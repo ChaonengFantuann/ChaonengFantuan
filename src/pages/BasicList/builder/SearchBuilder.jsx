@@ -5,12 +5,16 @@ import moment from "moment";
 const SearchBuiler = (data) => {
   return (
     (data || []).map((field) => {
-
+      const basicAttr = {
+        label: field.title,
+        name: field.key,
+        key: field.key,
+      }
       switch (field.type) {
         case 'text':
           return (
             <Col sm={6}>
-              <Form.Item label={field.title} name={field.key} key={field.key}>
+              <Form.Item {...basicAttr}>
                 <Input disabled={field.disabled} />
               </Form.Item>
             </Col>
@@ -18,7 +22,7 @@ const SearchBuiler = (data) => {
         case 'datetime':
           return (
             <Col sm={12}>
-              <Form.Item label={field.title} name={field.key} key={field.key}>
+              <Form.Item {...basicAttr}>
                 <DatePicker.RangePicker
                   showTime
                   disabled={field.disabled}
@@ -39,7 +43,7 @@ const SearchBuiler = (data) => {
         case 'tree':
           return (
             <Col sm={6}>
-              <Form.Item label={field.title} name={field.key} key={field.key}>
+              <Form.Item {...basicAttr}>
                 <TreeSelect treeData={field.data} disabled={field.disabled} treeCheckable />
               </Form.Item>
             </Col>
@@ -48,7 +52,7 @@ const SearchBuiler = (data) => {
         case 'switch':
           return (
             <Col sm={6}>
-              <Form.Item label={field.title} name={field.key} key={field.key} valuePropName='checked'>
+              <Form.Item {...basicAttr} valuePropName='checked'>
                 <Select>
                   {(field.data || []).map((option) => {
                     return (

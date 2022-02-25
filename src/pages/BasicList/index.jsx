@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { Table, Row, Col, Card, Pagination, Space, message, Modal as AntdModal, Tooltip, Button, Form, InputNumber } from "antd";
 import { useToggle } from "ahooks";
-import { stringify } from 'qs'
+import { stringify } from 'query-string'
 import { useRequest, history } from "umi";
+import QueueAnim from 'rc-queue-anim';
 import { PageContainer, FooterToolbar } from "@ant-design/pro-layout";
 import { ExclamationCircleOutlined, SearchOutlined } from "@ant-design/icons";
 import ColumnBuilder from "./builder/ColumnBuilder";
@@ -21,8 +22,9 @@ const index = () => {
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [seletedRows, setSeletedRows] = useState([]);
   const [tableColumns, setTableColumns] = useState([]);
-  const [searchVisible, searchAction] = useToggle(true);
+  const [searchVisible, searchAction] = useToggle(false);
   const { confirm } = AntdModal;
+  const [searchForm] = Form.useForm();
 
   const init = useRequest((values) => {
     return {
@@ -30,8 +32,8 @@ const index = () => {
       params: values,
       paramsSerializer: (params) => {
         console.log(params);
-        // return stringify(params, { arrayFormat: 'comma' });
-        console.log(stringify(params, { arrayFormat: 'comma' }));
+        return stringify(params, { arrayFormat: 'comma', skipEmptyString: true, skipNull: true });
+        // console.log(stringify(params, { arrayFormat: 'comma' }));
       },
     };
   });
@@ -175,28 +177,35 @@ const index = () => {
 
   const searchLayout = () => {
     return (
-      searchVisible && (
-        <Card className="styles.searchForm">
-          <Form onFinish={onFinish}>
-            <Row gutter={24}>
-              <Col sm={6}>
-                <Form.Item label='ID' name='id' key='id'>
-                  <InputNumber style={{ width: '100%' }} />
-                </Form.Item>
-              </Col>
-              {SearchBuiler(init?.data?.layout?.tableColumn)}
-            </Row>
-            <Row>
-              <Col sm={24} className={styles.textAlignRight}>
-                <Space>
-                  <Button type="primary" htmlType="submit">Submit</Button>
-                  <Button>Clear</Button>
-                </Space>
-              </Col>
-            </Row>
-          </Form>
-        </Card>
-      )
+      <QueueAnim>
+        {searchVisible && (
+          <Card className="styles.searchForm">
+            <Form onFinish={onFinish} form={searchForm} >
+              <Row gutter={24}>
+                <Col sm={6}>
+                  <Form.Item label='ID' name='id' key='id'>
+                    <InputNumber style={{ width: '100%' }} />
+                  </Form.Item>
+                </Col>
+                {SearchBuiler(init?.data?.layout?.tableColumn)}
+              </Row>
+              <Row>
+                <Col sm={24} className={styles.textAlignRight}>
+                  <Space>
+                    <Button type="primary" htmlType="submit">Submit</Button>
+                    <Button onClick={() => {
+                      init.run();
+                      searchForm.resetFields();
+                    }}>
+                      Clear
+                    </Button>
+                  </Space>
+                </Col>
+              </Row>
+            </Form>
+          </Card>
+        )}
+      </QueueAnim>
     );
   };
 
