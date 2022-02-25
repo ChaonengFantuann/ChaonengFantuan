@@ -1,12 +1,17 @@
 import { useState, useEffect } from "react";
-import { Table, Row, Col, Card, Pagination, Space, message, Modal as AntdModal } from "antd";
+import { Table, Row, Col, Card, Pagination, Space, message, Modal as AntdModal, Tooltip, Button, Form, InputNumber } from "antd";
+import { useToggle } from "ahooks";
+import { stringify } from 'qs'
 import { useRequest, history } from "umi";
 import { PageContainer, FooterToolbar } from "@ant-design/pro-layout";
-import { ExclamationCircleOutlined } from "@ant-design/icons";
+import { ExclamationCircleOutlined, SearchOutlined } from "@ant-design/icons";
 import ColumnBuilder from "./builder/ColumnBuilder";
 import ActionBuilder from "./builder/ActionBuilder";
+import SearchBuiler from "./builder/SearchBuilder";
 import Modal from "./compoment/Modal";
+import { submitFieldsAdaptor } from "./helper";
 import styles from "./index.less";
+
 
 const index = () => {
   const [pageQuery, setPageQuery] = useState('');
@@ -16,11 +21,20 @@ const index = () => {
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [seletedRows, setSeletedRows] = useState([]);
   const [tableColumns, setTableColumns] = useState([]);
+  const [searchVisible, searchAction] = useToggle(true);
   const { confirm } = AntdModal;
 
-  const init = useRequest(
-    `https://public-api-v2.aspirantzhang.com/api/admins?X-API-KEY=antd${pageQuery}${sortQuery}`,
-  );
+  const init = useRequest((values) => {
+    return {
+      url: `https://public-api-v2.aspirantzhang.com/api/admins?X-API-KEY=antd${pageQuery}${sortQuery}`,
+      params: values,
+      paramsSerializer: (params) => {
+        console.log(params);
+        // return stringify(params, { arrayFormat: 'comma' });
+        console.log(stringify(params, { arrayFormat: 'comma' }));
+      },
+    };
+  });
 
   const request = useRequest(
     (values) => {
@@ -155,7 +169,36 @@ const index = () => {
     }
   };
 
-  const searchLayout = () => { };
+  const onFinish = (value) => {
+    init.run(submitFieldsAdaptor(value));
+  }
+
+  const searchLayout = () => {
+    return (
+      searchVisible && (
+        <Card className="styles.searchForm">
+          <Form onFinish={onFinish}>
+            <Row gutter={24}>
+              <Col sm={6}>
+                <Form.Item label='ID' name='id' key='id'>
+                  <InputNumber style={{ width: '100%' }} />
+                </Form.Item>
+              </Col>
+              {SearchBuiler(init?.data?.layout?.tableColumn)}
+            </Row>
+            <Row>
+              <Col sm={24} className={styles.textAlignRight}>
+                <Space>
+                  <Button type="primary" htmlType="submit">Submit</Button>
+                  <Button>Clear</Button>
+                </Space>
+              </Col>
+            </Row>
+          </Form>
+        </Card>
+      )
+    );
+  };
 
   const beforeTableLayout = () => {
     return (
@@ -165,6 +208,16 @@ const index = () => {
         </Col>
         <Col xs={24} sm={12} className={styles.tableToolbar}>
           <Space>
+            <Tooltip title="search">
+              <Button
+                shape="circle"
+                icon={<SearchOutlined />}
+                onClick={() => {
+                  searchAction.toggle();
+                }}
+                type={searchVisible ? 'primary' : 'default'}
+              />
+            </Tooltip>
             {ActionBuilder(init?.data?.layout?.tableToolBar, actionHandler)}
           </Space>
         </Col>
