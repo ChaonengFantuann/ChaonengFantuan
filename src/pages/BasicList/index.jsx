@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Table, Row, Col, Card, Pagination, Space, message, Modal as AntdModal, Tooltip, Button, Form, InputNumber } from "antd";
 import { useToggle } from "ahooks";
 import { stringify } from 'query-string'
-import { useRequest, history } from "umi";
+import { useRequest, history, useLocation } from "umi";
 import QueueAnim from 'rc-queue-anim';
 import { PageContainer, FooterToolbar } from "@ant-design/pro-layout";
 import { ExclamationCircleOutlined, SearchOutlined } from "@ant-design/icons";
@@ -25,10 +25,11 @@ const index = () => {
   const [searchVisible, searchAction] = useToggle(false);
   const { confirm } = AntdModal;
   const [searchForm] = Form.useForm();
+  const location = useLocation();
 
   const init = useRequest((values) => {
     return {
-      url: `https://public-api-v2.aspirantzhang.com/api/admins?X-API-KEY=antd${pageQuery}${sortQuery}`,
+      url: `https://public-api-v2.aspirantzhang.com${location.pathname.replace('/basic-list', '')}?X-API-KEY=antd${pageQuery}${sortQuery}`,
       params: values,
       paramsSerializer: (params) => {
         console.log(params);
@@ -68,7 +69,7 @@ const index = () => {
 
   useEffect(() => {
     init.run();
-  }, [pageQuery, sortQuery])
+  }, [pageQuery, sortQuery, location.pathname])
 
   useEffect(() => {
     if (init?.data?.layout?.tableColumn) {

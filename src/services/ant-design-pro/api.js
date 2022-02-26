@@ -10,6 +10,12 @@ export async function currentUser(options) {
     ...(options || {}),
   });
 }
+export async function currentMenu(options) {
+  return request('https://public-api-v2.aspirantzhang.com/api/menus/backend', {
+    method: 'GET',
+    ...(options || {}),
+  });
+}
 /** 退出登录接口 POST /api/login/outLogin */
 
 export async function outLogin(options) {

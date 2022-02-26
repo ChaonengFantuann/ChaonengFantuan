@@ -49,16 +49,14 @@ export default [
     component: './TableList',
   },
   {
-    name: 'basic-list',
-    icon: 'table',
-    path: '/basic-list',
-    component: './BasicList',
+    path: '/basic-list/api/*/*',
+    component: './BasicList/compoment/Page',
   },
   {
-    name: 'single-page',
+    name: 'basic-list',
     icon: 'table',
-    path: '/basic-list/api/admins/*',
-    component: './BasicList/compoment/Page',
+    path: '/basic-list/*',
+    component: './BasicList',
   },
   {
     path: '/',
